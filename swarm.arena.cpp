@@ -266,7 +266,7 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
             pathgn += cost_calculator(px,py,coli,rowi);
             ind_hn = heuristic(coli,rowi,gx,gy);
             complete_node putar(1,rowi,coli,px,py,pathgn,ind_hn);
-            Serial.print("\t");print_complete_node(putar);
+            print_complete_node(putar);
             exparraylist.emplace(putar);
           }
           else

@@ -38,7 +38,6 @@ int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y);
 int** our_obstacles(bool close = true, int** arr3 = 0);
 
 
-
 class complete_node
 {
   private:
