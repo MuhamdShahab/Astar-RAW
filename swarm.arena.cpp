@@ -242,7 +242,6 @@ queue<complete_node> exparraylist;
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
 
-  //modification: by closed list check
   double ind_hn = 0;
   int rowi =0;
   int coli = 0;
