@@ -27,13 +27,14 @@ class node
     void setnodecol(int val){pos_x = val;}
     int getnoderow(){return pos_y;}
     int getnodecol(){return pos_x;}
+    ~node();
 };
 void print_node(node& param);
 
 
 void printmap(int** arr,int col, int row);
 void printmap_rev(int** arr,int col, int row);
-queue<node> closedlist;
+
 int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y);
 int** our_obstacles(bool close = true, int** arr3 = 0);
 
@@ -73,6 +74,7 @@ class complete_node
   void sethnn(float val){ hnn = val;}
   void setgnn(float val){ gnn = val;}
   //void setfnn(float val){ fnn = val;}
+  ~complete_node();
 };
 void print_complete_node(complete_node& param);
 
@@ -84,10 +86,9 @@ double cost_calculator(double sx, double sy, double gx, double gy);
 double heuristic(double sx, double sy, double gx, double gy);
 
 bool checknodeinclosed(node& temp_putri);
-queue<complete_node> exparraylist;
+
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim);
-queue<complete_node> onesopenlist;
-queue<complete_node> zerosopenlist;
+
 void printonesopenlist();
 void printzerosopenlist();
 void printclosedlist();

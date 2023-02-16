@@ -92,8 +92,8 @@ void printmap_rev(int** arr,int col, int row)
   }
 }
 
-
-//create obstacle and generate its boundary
+queue<node> closedlist;
+//create obstacle and put it in  closed list
 int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y)
 { 
   node obj(posi_x,posi_y);
@@ -237,7 +237,7 @@ bool checknodeinclosed(node &temp_putri)
   return res;
 }
 
-
+queue<complete_node> exparraylist;
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
 
@@ -286,8 +286,8 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
   }
 }
 
-
-
+queue<complete_node> onesopenlist;
+queue<complete_node> zerosopenlist;
 void printonesopenlist()//prints the Ones Open List
 {
   Serial.println("Ones Open List:");
