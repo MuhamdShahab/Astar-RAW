@@ -1,6 +1,5 @@
 #include "swarm_arena.h"
-#include <Queue>
-using namespace std;
+
 
 int** getmap(int entry, int col, int row)
 {
@@ -93,7 +92,7 @@ void printmap_rev(int** arr,int col, int row)
   }
 }
 
-queue<node> closedlist;
+
 //create obstacle and generate its boundary
 int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y)
 { 
@@ -238,7 +237,7 @@ bool checknodeinclosed(node &temp_putri)
   return res;
 }
 
-queue<complete_node> exparraylist;
+
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
 
@@ -287,8 +286,7 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
   }
 }
 
-queue<complete_node> onesopenlist;
-queue<complete_node> zerosopenlist;
+
 
 void printonesopenlist()//prints the Ones Open List
 {
