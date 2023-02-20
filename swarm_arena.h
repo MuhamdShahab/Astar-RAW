@@ -27,7 +27,6 @@ class node
     void setnodecol(int val){pos_x = val;}
     int getnoderow(){return pos_y;}
     int getnodecol(){return pos_x;}
-    ~node();
 };
 void print_node(node& param);
 
@@ -74,10 +73,16 @@ class complete_node
   void sethnn(float val){ hnn = val;}
   void setgnn(float val){ gnn = val;}
   //void setfnn(float val){ fnn = val;}
-  ~complete_node();
 };
 void print_complete_node(complete_node& param);
-
+class comparefnn
+{
+public:
+    bool operator() (complete_node&a, complete_node&b)
+    {
+        return a.getfnn() < b.getfnn();
+    }
+};
  
 bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim);
 bool issourcegoalsame(int sx, int sy, int gx, int gy);

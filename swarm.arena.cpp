@@ -119,9 +119,9 @@ int** our_obstacles(bool close, int** arr3)
   return arr3;
 }
 
-//////////////////////////
-//Astar things starts here
-//////////////////////////
+/////////////////////////////////////////////
+///////// Astar things starts here /////////
+///////////////////////////////////////////
 
 //each node has some features
 complete_node::complete_node(int tag1, int x1, int y1,int Px1, int Py1, double gnn1, double hnn1)
@@ -237,7 +237,10 @@ bool checknodeinclosed(node &temp_putri)
   return res;
 }
 
-queue<complete_node> exparraylist;
+priority_queue<complete_node, vector<complete_node>,comparefnn> onesopenlist;
+//queue<complete_node> onesopenlist;
+queue<complete_node> zerosopenlist;
+
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
 
@@ -246,7 +249,7 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
   int coli = 0;
   double pathgn =0;
   bool nnic = false; //node not in closed()
-  Serial.println("Expand_Array: ");
+  //Serial.println("Expand_Array: ");
   for(int i = 1;i>=-1; --i) //for row iterators in child
   {
     rowi = py+i;
@@ -265,8 +268,8 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
             pathgn += cost_calculator(px,py,coli,rowi);
             ind_hn = heuristic(coli,rowi,gx,gy);
             complete_node putar(1,rowi,coli,px,py,pathgn,ind_hn);
-            print_complete_node(putar);
-            exparraylist.emplace(putar);
+            //print_complete_node(putar);
+            onesopenlist.emplace(putar);
           }
           else
           {
@@ -286,8 +289,8 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
   }
 }
 
-queue<complete_node> onesopenlist;
-queue<complete_node> zerosopenlist;
+
+
 void printonesopenlist()//prints the Ones Open List
 {
   Serial.println("Ones Open List:");
@@ -383,11 +386,7 @@ int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_l
     onesopenlist.front().settag(0);
     zerosopenlist.emplace(onesopenlist.front());
     onesopenlist.pop();
-    while(!exparraylist.empty()) //updating open with childs
-      {
-        onesopenlist.emplace(exparraylist.front());
-        exparraylist.pop();
-      }
+
     printonesopenlist();
     printzerosopenlist();
     printclosedlist();
