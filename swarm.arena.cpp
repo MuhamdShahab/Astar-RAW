@@ -124,9 +124,9 @@ int** our_obstacles(bool close, int** arr3)
 ///////////////////////////////////////////
 
 //each node has some features
-complete_node::complete_node(int tag1, int x1, int y1,int Px1, int Py1, double gnn1, double hnn1)
-  {
-    tag = tag1;
+complete_node::complete_node(int x1, int y1,int Px1, int Py1, double gnn1, double hnn1)
+{
+    //tag = tag1;
     x = x1;
     y = y1;
     Px =  Px1;
@@ -134,7 +134,7 @@ complete_node::complete_node(int tag1, int x1, int y1,int Px1, int Py1, double g
     gnn = gnn1;
     hnn = hnn1;
     fnn = gnn + hnn;
-  }
+}
 bool operator== (const complete_node& n1, const complete_node& n2) //operator OVerloading for Equal
 {
     return (n1.x == n2.x &&
@@ -147,8 +147,6 @@ bool operator!= (const complete_node& n1, const complete_node& n2)//Operator Ove
 }
 void print_complete_node(complete_node &param)
 {
-  Serial.print("\tTag: ");
-  Serial.print(param.gettag());
   Serial.print("\tDestination(x,y): ");
   Serial.print(param.getcol());
   Serial.print(" , ");
@@ -164,6 +162,7 @@ void print_complete_node(complete_node &param)
   Serial.print("\tFnn: ");
   Serial.println(param.getfnn());
 }
+
 
 bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim)
 {
@@ -238,12 +237,28 @@ bool checknodeinclosed(node &temp_putri)
 }
 
 priority_queue<complete_node, vector<complete_node>,comparefnn> onesopenlist;
-//queue<complete_node> onesopenlist;
 queue<complete_node> zerosopenlist;
+
+
+void checkforleastfinones(complete_node &param)
+{
+  queue<complete_node> onesopenforprint;
+  while(!onesopenlist.empty()) //transfer of priority queue to simple queue
+  {
+    onesopenforprint.emplace(onesopenlist.top());
+    onesopenlist.pop();
+  }
+  //check process begin here
+
+  while(!onesopenforprint.empty()) //transfer of simple queue to the priority queue
+  {
+    onesopenlist.emplace(onesopenforprint.front());
+    onesopenforprint.pop();
+  }
+}
 
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
-
   double ind_hn = 0;
   int rowi =0;
   int coli = 0;
@@ -267,8 +282,9 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
             pathgn = cum_gn;
             pathgn += cost_calculator(px,py,coli,rowi);
             ind_hn = heuristic(coli,rowi,gx,gy);
-            complete_node putar(1,rowi,coli,px,py,pathgn,ind_hn);
+            complete_node putar(rowi,coli,px,py,pathgn,ind_hn);
             //print_complete_node(putar);
+            //checkforleastfinones(putar);
             onesopenlist.emplace(putar);
           }
           else
@@ -290,28 +306,39 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
 }
 
 
-
-void printonesopenlist()//prints the Ones Open List
+void printonesopenlist()
 {
-  Serial.println("Ones Open List:");
-  complete_node temp_front = onesopenlist.front();
-  onesopenlist.pop();
-  if(onesopenlist.empty())
+  queue<complete_node> onesopenforprint;
+  while(!onesopenlist.empty())
   {
-    onesopenlist.emplace(temp_front);
+    onesopenforprint.emplace(onesopenlist.top());
+    onesopenlist.pop();
+  }
+  Serial.println("Ones Open List:");
+  complete_node temp_front = onesopenforprint.front();
+  onesopenforprint.pop();
+
+  if(onesopenforprint.empty())
+  {
     print_complete_node(temp_front);
+    onesopenforprint.emplace(temp_front);
   }
   else
   {
-    onesopenlist.emplace(temp_front);
     print_complete_node(temp_front);
-    while (onesopenlist.front() != temp_front)
+    onesopenforprint.emplace(temp_front);
+    while (onesopenforprint.front() != temp_front)
     {
-      complete_node temp_front2 = onesopenlist.front();
-      onesopenlist.pop();
-      onesopenlist.emplace(temp_front2);
+      complete_node temp_front2 = onesopenforprint.front();
+      onesopenforprint.pop();
       print_complete_node(temp_front2);
+      onesopenforprint.emplace(temp_front2);
     }
+  }
+  while(!onesopenforprint.empty())
+  {
+    onesopenlist.emplace(onesopenforprint.front());
+    onesopenforprint.pop();
   }
 }
 
@@ -372,24 +399,22 @@ int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_l
   {
     arr5 = markgoalandstart(arr5,sx,sy,gx,gy);
     //object for start node
-    complete_node start(1,sx,sy,sx,sy,0,heuristic(sx,sy,gx,gy));
+    complete_node start(sx,sy,sx,sy,0,heuristic(sx,sy,gx,gy));
     onesopenlist.emplace(start); //initializing Open list with the start
-    printonesopenlist();
 
     //object for closed list
-    node open_front(onesopenlist.front().getPcol(),onesopenlist.front().getProw()); 
+    node open_front(onesopenlist.top().getPcol(),onesopenlist.top().getProw()); 
     closedlist.emplace(open_front); //sending previously expanded node in closed list.
-    //expanding the childs for the Toppest Element in onesopenlist
-    expand_array(arr5, onesopenlist.front().getcol(),onesopenlist.front().getrow(),onesopenlist.front().getfnn(), gx, gy, left_lim, right_lim);//child expanded
+
+    zerosopenlist.emplace(onesopenlist.top());
+    onesopenlist.pop();
+    //expanding the childss for the Toppest Element in onesopenlist
+    expand_array(arr5, zerosopenlist.back().getcol(),zerosopenlist.back().getrow(),zerosopenlist.back().getfnn(), gx, gy, left_lim, right_lim);//child expanded
     
     //setting the tag zero for expanded ones and sending them to zeros and removing from ones
-    onesopenlist.front().settag(0);
-    zerosopenlist.emplace(onesopenlist.front());
-    onesopenlist.pop();
-
     printonesopenlist();
-    printzerosopenlist();
     printclosedlist();
+    printzerosopenlist();
   }
   else
   {

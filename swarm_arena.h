@@ -41,7 +41,7 @@ int** our_obstacles(bool close = true, int** arr3 = 0);
 class complete_node
 {
   private:
-    int tag =0;
+    //int tag =0;
     int x = 0;
     int y = 0;
     int Px = 0;
@@ -51,39 +51,39 @@ class complete_node
     double fnn = 0;
 
   public:
-  complete_node(int tag1, int x1, int y1,int Px1,int Py1, double gnn1, double hnn1);
+  complete_node(int x1, int y1,int Px1,int Py1, double gnn1, double hnn1);
   //operator Overloading
   friend bool operator== (const complete_node& n1, const complete_node& n2);
   friend bool operator!= (const complete_node& n1, const complete_node& n2);
   //getters
-  int gettag(){return tag;}
-  int getProw(){return Py;}
-  int getPcol(){return Px;}
-  int getrow(){return y;}
-  int getcol(){return x;}
-  float gethnn(){return hnn;}
-  float getgnn(){return gnn;}
-  float getfnn(){return fnn;}
+  //int gettag()const {return tag;}
+  int getProw()const {return Py;}
+  int getPcol()const {return Px;}
+  int getrow()const {return y;}
+  int getcol()const{return x;}
+  double gethnn()const {return hnn;}
+  double getgnn()const {return gnn;}
+  double getfnn()const {return fnn;}
   //setters
-  void settag(int val){tag = val;}
+  //void settag(int val){tag = val;}
   void setProw(int val){Py = val;}
   void setPcol(int val){Px = val;}
   void setrow(int val){ y = val;}
   void setcol(int val){ x = val;}
   void sethnn(float val){ hnn = val;}
   void setgnn(float val){ gnn = val;}
-  //void setfnn(float val){ fnn = val;}
+  void setfnn(float val){ fnn = val;}
 };
 void print_complete_node(complete_node& param);
 class comparefnn
 {
 public:
-    bool operator() (complete_node&a, complete_node&b)
+    bool operator() (const complete_node & a, const complete_node & b)
     {
-        return a.getfnn() < b.getfnn();
+        return a.getfnn() > b.getfnn();
     }
 };
- 
+   
 bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim);
 bool issourcegoalsame(int sx, int sy, int gx, int gy);
 int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy);
