@@ -239,7 +239,6 @@ bool checknodeinclosed(node &temp_putri)
 priority_queue<complete_node, vector<complete_node>,comparefnn> onesopenlist;
 queue<complete_node> zerosopenlist;
 
-
 void checkforleastfinones(complete_node &param)
 {
   queue<complete_node> onesopenforprint;
@@ -256,7 +255,6 @@ void checkforleastfinones(complete_node &param)
     onesopenforprint.pop();
   }
 }
-
 void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
 {
   double ind_hn = 0;
@@ -304,8 +302,6 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
     }
   }
 }
-
-
 void printonesopenlist()
 {
   queue<complete_node> onesopenforprint;
@@ -341,7 +337,6 @@ void printonesopenlist()
     onesopenforprint.pop();
   }
 }
-
 void printzerosopenlist()//prints the Zeros Open List
 {
   Serial.println("Zeros Open List:");
@@ -365,7 +360,6 @@ void printzerosopenlist()//prints the Zeros Open List
     }
   }
 }
-
 void printclosedlist()//prints the Closed list 
 {
   Serial.println("Closed List:");
@@ -389,7 +383,6 @@ void printclosedlist()//prints the Closed list
     }
   }
 }
-
 int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_lim)
 {
   Serial.println("A-Star Started.");
