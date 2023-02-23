@@ -19,7 +19,6 @@ class node
     int pos_y = -10;
   public:
     node(int x_cord,int y_cord);
-    int** draw_obstacle_and_boundary(int** arr2);
     int** draw_obstacle(int** arr4);
     friend bool operator== (const node& n1, const node& n2);
     friend bool operator!= (const node& n1, const node& n2);
@@ -34,8 +33,8 @@ void print_node(node& param);
 void printmap(int** arr,int col, int row);
 void printmap_rev(int** arr,int col, int row);
 
-int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y);
-int** our_obstacles(bool close = true, int** arr3 = 0);
+int** place_obstacle(int** arr1,int posi_x,int posi_y);
+int** our_obstacles(int** arr3 = 0);
 
 
 class complete_node
@@ -90,12 +89,10 @@ int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy);
 double cost_calculator(double sx, double sy, double gx, double gy);
 double heuristic(double sx, double sy, double gx, double gy);
 
-bool checknodeinclosed(node& temp_putri);
 
-void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim);
+void generate_successors(int** arr7, complete_node &param,int gx,int gy, int left_lim, int right_lim);
 
-void printonesopenlist();
-void printzerosopenlist();
+void printopenedlist();
 void printclosedlist();
 int** Astar(int sx, int sy, int gx, int gy, int** arr5, int left_lim, int right_lim);
 

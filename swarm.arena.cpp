@@ -1,6 +1,6 @@
 #include "swarm_arena.h"
 
-
+bool found_dest = false;
 int** getmap(int entry, int col, int row)
 {
   int** arr = new int*[row];
@@ -13,7 +13,6 @@ int** getmap(int entry, int col, int row)
   //Serial.println("Map of Ones Created Successfully");
   return arr;
 }
-
 //node methods plus constructors
 node::node(int x_cord,int y_cord)
 {
@@ -24,24 +23,6 @@ node::node(int x_cord,int y_cord)
   }
   else
   Serial.println("Can't add node Outside the limits.");
-}
-int** node::draw_obstacle_and_boundary(int** arr2)
-{
-  for(int j=pos_y-2;j<=pos_y+2;++j)
-  {
-    for(int k=pos_x-2;k<=pos_x+2;++k)
-    {
-      if(( j >= 0) && ( j <= ROW-1) && ( k >= 0) && ( k <= COL-1))
-        if((j==pos_y-2)||(j==pos_y+2)||(k==pos_x-2)||(k==pos_x+2) )
-            arr2[j][k]=0;
-        else
-            arr2[j][k]=9;
-      else{
-         //Serial.println("Encountered boundary outside map. Skipping");  
-         }
-    }
-  } 
-return arr2;
 }
 int** node::draw_obstacle(int** arr4)
 {
@@ -65,7 +46,6 @@ void print_node(node& param)
   Serial.print(" , ");
   Serial.println(param.getnoderow());
 }
-
 // functions to display array
 void printmap(int** arr,int col, int row)
 {
@@ -91,31 +71,19 @@ void printmap_rev(int** arr,int col, int row)
       Serial.println();
   }
 }
-
-queue<node> closedlist;
 //create obstacle and put it in  closed list
-int** place_obstacle(bool close, int** arr1,int posi_x,int posi_y)
+int** place_obstacle(int** arr1,int posi_x,int posi_y)
 { 
   node obj(posi_x,posi_y);
   arr1 = obj.draw_obstacle(arr1);
-  if(close)
-  {
-    closedlist.emplace(obj);
-    //Serial.println("Sending obstacles data to Closed Queue.");
-  }
-  else
-  {
-    Serial.println("Could'nt send Obstacles to Closed Queue.");
-  }
-  
   return arr1;
 }
-int** our_obstacles(bool close, int** arr3)
+int** our_obstacles(int** arr3)
 {
-  arr3 = place_obstacle(close, arr3,1,3);
-  arr3 = place_obstacle(close, arr3,7,4);
-  arr3 = place_obstacle(close, arr3,12,1);
-  arr3 = place_obstacle(close, arr3,17,2);
+  arr3 = place_obstacle(arr3,1,3);
+  arr3 = place_obstacle(arr3,7,4);
+  arr3 = place_obstacle(arr3,12,1);
+  arr3 = place_obstacle(arr3,17,2);
   return arr3;
 }
 
@@ -162,8 +130,6 @@ void print_complete_node(complete_node &param)
   Serial.print("\tFnn: ");
   Serial.println(param.getfnn());
 }
-
-
 bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim)
 {
   if((sx >= left_lim) && (sx <= right_lim) && (gx >= left_lim) && (gx <= right_lim) &&
@@ -178,7 +144,6 @@ bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_l
     return false;
   }
 }
-
 bool issourcegoalsame(int sx, int sy, int gx, int gy)
 {
   if((sx == gx) && (sy == gy))
@@ -192,7 +157,6 @@ bool issourcegoalsame(int sx, int sy, int gx, int gy)
     return true;
   }
 }
-
 int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy)
 {
   arr6[sy][sx] = 7; //start point
@@ -200,68 +164,167 @@ int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy)
   Serial.println("Printing Map after Goal and Start Placement : { 7 is Start, 9 is Goal & 0 is obstacle }");printmap(arr6,COL, ROW);
   return arr6;
 }
-
 double cost_calculator(double sx, double sy, double gx, double gy)
 {
   return sqrt(((gx-sx)*(gx-sx)) + ((gy-sy)*(gy-sy)));
 }
-
 double heuristic(double sx, double sy, double gx, double gy)
 {
   return sqrt(((gx-sx)*(gx-sx)) + ((gy-sy)*(gy-sy)));
 }
-
-int** cpppath = getmap(0,2,2);
-
-bool checknodeinclosed(node &temp_putri)
+bool isdestination(int sx, int sy, int gx, int gy)
 {
-  bool res = true;
-  node temp_front = closedlist.front();
-  closedlist.pop();
-  closedlist.emplace(temp_front);
-  while(closedlist.front() != temp_front)
+  if ((sx == gx) && (sy == gy))
   {
-    node temp_front2 = closedlist.front();
-    closedlist.pop();
-    closedlist.emplace(temp_front2);
-    if((temp_putri == temp_front2) && res)
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+priority_queue<complete_node, vector<complete_node>,comparefnn> openedlist;
+queue<complete_node> closedlist;
+
+
+
+int** trackthepath(int gx, int gy)
+{
+  int** pathi = getmap(0,2,2);
+  return pathi;
+}
+complete_node existingputar(-1,-1,-1,-1,-1,-1);
+
+bool notinclosed(complete_node &param) //return true if not found in closed
+{
+  bool out = true;
+  int size = closedlist.size();
+  if(size >0)
+  {
+    int i =0;
+    while(i<size)
     {
-      res = false;
+      complete_node mynode = closedlist.front();
+      closedlist.pop();
+      if((param.getcol() == mynode.getcol())  && (param.getrow() == mynode.getrow()) && out)
+      {
+        existingputar = param;
+        out = false;
+      }
+      closedlist.emplace(mynode);
+      i++;
     }
-    else
+  }
+  else
+  {
+    return out;
+  }
+}
+
+void updateexistinginclosed(complete_node &param) //upadtes the existing on in closed
+{
+  int size = closedlist.size();
+  if(size >0)
+  {
+    int i =0;
+    while(i<size)
     {
-      continue;
-    } 
+      complete_node mynode = closedlist.front();
+      closedlist.pop();
+      if(mynode == existingputar)
+      {
+        mynode = param;
+      }
+      closedlist.emplace(mynode);
+      i++;
+    }
   }
-  return res;
+  else
+  {}
 }
 
-priority_queue<complete_node, vector<complete_node>,comparefnn> onesopenlist;
-queue<complete_node> zerosopenlist;
-
-void checkforleastfinones(complete_node &param)
+bool notinopened(complete_node &param) //return true if not found in open
 {
-  queue<complete_node> onesopenforprint;
-  while(!onesopenlist.empty()) //transfer of priority queue to simple queue
+  bool out = true;
+  int size = openedlist.size();
+  if(size >0)
   {
-    onesopenforprint.emplace(onesopenlist.top());
-    onesopenlist.pop();
+    queue<complete_node> openedlisttemp;
+    while(!openedlist.empty())
+    {
+      openedlisttemp.emplace(openedlist.top());
+      openedlist.pop();
+    }
+    int i =0;
+    while(i<size)
+    {
+      complete_node mynode = openedlisttemp.front();
+      openedlisttemp.pop();
+      if((param.getcol() == mynode.getcol())  && (param.getrow() == mynode.getrow()) && out)
+      {
+        existingputar = param;
+        out = false;
+      }
+      openedlisttemp.emplace(mynode);
+      i++;
+    }
+    while(!openedlisttemp.empty())
+    {
+      openedlist.emplace(openedlisttemp.front());
+      openedlisttemp.pop();
+    }
   }
-  //check process begin here
-
-  while(!onesopenforprint.empty()) //transfer of simple queue to the priority queue
+  else
   {
-    onesopenlist.emplace(onesopenforprint.front());
-    onesopenforprint.pop();
+    return out;
   }
 }
-void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
+
+void updateexistinginopened(complete_node &param)
 {
+  int size = openedlist.size();
+  if(size >0)
+  {
+    queue<complete_node> openedlisttemp;
+    while(!openedlist.empty())
+    {
+      openedlisttemp.emplace(openedlist.top());
+      openedlist.pop();
+    }
+    int i =0;
+    while(i<size)
+    {
+      complete_node mynode = openedlisttemp.front();
+      openedlisttemp.pop();
+      if(mynode == existingputar)
+      {
+        mynode = param;
+      }
+      openedlisttemp.emplace(mynode);
+      i++;
+    }
+    while(!openedlisttemp.empty())
+    {
+      openedlist.emplace(openedlisttemp.front());
+      openedlisttemp.pop();
+    }
+  }
+  else
+  {}
+}
+
+void generate_successors(int** arr7, complete_node& papa,int gx,int gy, int left_lim, int right_lim) //generates the child for the given node and put them back in OPEN
+{
+  //Serial.println("1");
   double ind_hn = 0;
   int rowi =0;
   int coli = 0;
   double pathgn =0;
-  bool nnic = false; //node not in closed()
+  int px = papa.getcol();
+  int py = papa.getrow();
+
+  double fnn =0;
   //Serial.println("Expand_Array: ");
   for(int i = 1;i>=-1; --i) //for row iterators in child
   {
@@ -272,27 +335,80 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
       {
         coli = px+j;
         if((coli >= left_lim) && (coli <= right_lim )) //if columns are in left/right limits
-        { 
-          node temp_putar(coli,rowi);
-          nnic = checknodeinclosed(temp_putar);
-          if(nnic)
+        {
+          if((arr7[coli][rowi] != 0) && (papa.getcol() != coli) || (papa.getrow() != rowi))
           {
-            pathgn = cum_gn;
-            pathgn += cost_calculator(px,py,coli,rowi);
-            ind_hn = heuristic(coli,rowi,gx,gy);
-            complete_node putar(rowi,coli,px,py,pathgn,ind_hn);
+            complete_node putar(coli,rowi,papa.getcol(), papa.getrow(),0,0);
+            putar.setcol(coli);putar.setrow(rowi);
+            putar.setPcol(papa.getcol());putar.setProw(papa.getrow());
             //print_complete_node(putar);
-            //checkforleastfinones(putar);
-            onesopenlist.emplace(putar);
+            //Serial.println("2");
+            //d-i) if successor is goal stop search
+            if(isdestination(putar.getcol(),putar.getrow(),gx,gy))
+            {
+              
+              Serial.println("Success: The Goal matched with successor. Hurayyyy!");
+              found_dest = true;
+            }
+            //d-ii) compute both g and h for successor
+            else
+            { 
+              if(notinclosed(putar)) //putar is not in closed
+              {
+                //Serial.println("3");
+                pathgn =  papa.getgnn() + cost_calculator(px,py,coli,rowi); //succesor current cost
+                putar.setgnn(pathgn);
+                ind_hn = heuristic(coli,rowi,gx,gy);
+                putar.sethnn(ind_hn);
+                putar.setfnn(pathgn+ind_hn);
+
+                if(notinopened(putar))
+                {
+                  //Serial.println("4");
+                  //Serial.println("New Child: Adding to Openlist");
+                  openedlist.emplace(putar);
+                }
+                else //if it is in open
+                {
+                  //Serial.println("5");
+                  if(putar.getgnn() < existingputar.getgnn()) //already in open has cost less than new coming
+                  {
+                    //Serial.println("6");
+                    Serial.println("Updating exisiting in opened.");
+                    updateexistinginopened(putar);
+                  }
+                  else
+                  {
+                    //Serial.println("7");
+                    //skip the child
+                  }
+                }
+              }
+              else //putar is already in closed
+              {
+                //Serial.println("8");
+                if(putar.getgnn() < existingputar.getgnn()) //already in close has cost less than new coming
+                {
+                  //Serial.println("9");
+                  Serial.println("Updating exisiting in closed.");
+                  updateexistinginclosed(putar);
+                }
+                else
+                {
+                  //Serial.println("10");
+                    //skip the child
+                }
+              }
+            }
           }
           else
           {
-            //Serial.println("\tSkipped: Encountered node as Obstacle/Parent/Explored in Closed list.");
+            //Serial.println("\tSkipped: Encountered node as Obstacle/Parent.");
           }
         }
         else
         {
-          //Serial.println("Skipped : Can't Create a child outside limit.");
+          //Serial.println("Skipped : Child in X is outside limit.");
         }
       }
     }
@@ -302,116 +418,101 @@ void expand_array(int** arr7, int px, int py,double cum_gn,int gx,int gy, int le
     }
   }
 }
-void printonesopenlist()
+void printopenedlist()
 {
-  queue<complete_node> onesopenforprint;
-  while(!onesopenlist.empty())
+  Serial.println("Opened List: ");
+  int size = openedlist.size();
+  if(size >0)
   {
-    onesopenforprint.emplace(onesopenlist.top());
-    onesopenlist.pop();
-  }
-  Serial.println("Ones Open List:");
-  complete_node temp_front = onesopenforprint.front();
-  onesopenforprint.pop();
-
-  if(onesopenforprint.empty())
-  {
-    print_complete_node(temp_front);
-    onesopenforprint.emplace(temp_front);
-  }
-  else
-  {
-    print_complete_node(temp_front);
-    onesopenforprint.emplace(temp_front);
-    while (onesopenforprint.front() != temp_front)
+    queue<complete_node> openedlisttemp;
+    while(!openedlist.empty())
     {
-      complete_node temp_front2 = onesopenforprint.front();
-      onesopenforprint.pop();
-      print_complete_node(temp_front2);
-      onesopenforprint.emplace(temp_front2);
+      openedlisttemp.emplace(openedlist.top());
+      openedlist.pop();
+    }
+    int i =0;
+    while(i<size)
+    {
+      complete_node mynode = openedlisttemp.front();
+      openedlisttemp.pop();
+      print_complete_node(mynode);
+      openedlisttemp.emplace(mynode);
+      i++;
+    }
+    while(!openedlisttemp.empty())
+    {
+      openedlist.emplace(openedlisttemp.front());
+      openedlisttemp.pop();
     }
   }
-  while(!onesopenforprint.empty())
-  {
-    onesopenlist.emplace(onesopenforprint.front());
-    onesopenforprint.pop();
-  }
-}
-void printzerosopenlist()//prints the Zeros Open List
-{
-  Serial.println("Zeros Open List:");
-  complete_node temp_front = zerosopenlist.front();
-  zerosopenlist.pop();
-  if(zerosopenlist.empty())
-  {
-    zerosopenlist.emplace(temp_front);
-    print_complete_node(temp_front);
-  }
   else
   {
-    zerosopenlist.emplace(temp_front);
-    print_complete_node(temp_front);
-    while (zerosopenlist.front() != temp_front)
-    {
-      complete_node temp_front2 = zerosopenlist.front();
-      zerosopenlist.pop();
-      zerosopenlist.emplace(temp_front2);
-      print_complete_node(temp_front2);
-    }
   }
 }
-void printclosedlist()//prints the Closed list 
+void printclosedlist()
 {
-  Serial.println("Closed List:");
-  node temp_front = closedlist.front();
-  closedlist.pop();
-  if(closedlist.empty())
+Serial.println("Closed List: ");
+  int size = closedlist.size();
+  if(size >0)
   {
-    closedlist.emplace(temp_front);
-    print_node(temp_front);
-  }
-  else
-  {
-    closedlist.emplace(temp_front);
-    print_node(temp_front);
-    while (closedlist.front() != temp_front)
+    int i =0;
+    while(i<size)
     {
-      node temp_front2 = closedlist.front();
+      complete_node mynode = closedlist.front();
       closedlist.pop();
-      closedlist.emplace(temp_front2);
-      print_node(temp_front2);
+      print_complete_node(mynode);
+      closedlist.emplace(mynode);
+      i++;
     }
   }
+  else
+  {
+  }
 }
+
 int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_lim)
 {
-  Serial.println("A-Star Started.");
+  Serial.println("A-Star Started...");
   bool gsv = isgoalsourcevalid(sx, sy, gx, gy, left_lim, right_lim); //returns bool
   bool sgs = issourcegoalsame(sx, sy, gx, gy); //returns bool
   if(gsv && sgs)
   {
+    int i = 0;
     arr5 = markgoalandstart(arr5,sx,sy,gx,gy);
     //object for start node
     complete_node start(sx,sy,sx,sy,0,heuristic(sx,sy,gx,gy));
-    onesopenlist.emplace(start); //initializing Open list with the start
-
-    //object for closed list
-    node open_front(onesopenlist.top().getPcol(),onesopenlist.top().getProw()); 
-    closedlist.emplace(open_front); //sending previously expanded node in closed list.
-
-    zerosopenlist.emplace(onesopenlist.top());
-    onesopenlist.pop();
-    //expanding the childss for the Toppest Element in onesopenlist
-    expand_array(arr5, zerosopenlist.back().getcol(),zerosopenlist.back().getrow(),zerosopenlist.back().getfnn(), gx, gy, left_lim, right_lim);//child expanded
-    
-    //setting the tag zero for expanded ones and sending them to zeros and removing from ones
-    printonesopenlist();
-    printclosedlist();
-    printzerosopenlist();
+    // 1. Initialize the 
+    openedlist.emplace(start); //initializing Open list with the start
+    while(!found_dest)
+    {
+      //object for closed list
+      //----- ( a ) node to be expanded with least fn
+      complete_node parent = openedlist.top(); 
+      //----- ( b ) pop the least fn node
+      openedlist.pop();
+      //----- ( c ) & ( d ) Generate successors & set their parent
+      generate_successors(arr5, parent, gx, gy, left_lim, right_lim);//child expanded
+      //----- ( e ) push explored to the closed list
+      closedlist.emplace(parent); //sending previously expanded node in closed list.
+      
+      printclosedlist();
+      printopenedlist();
+    } 
   }
   else
   {
-    Serial.println("Something went Wrong!");
+    Serial.println("Unsuccessful: Something went Wrong in A-start! Recheck Goal & Source.");
+    return getmap(0,1,1);
   }
-  return cpppath;
+  if(!found_dest)
+  {
+    Serial.print("Unsucessful: Goal not found in Map.");
+    return getmap(0,1,1);
+  }
+  else
+  {
+    Serial.println("Success: A-Star Finished succesfully, Returning Path.");
+    int** cpppath = trackthepath(gx,gy);
+    return cpppath;
+  }
 }
