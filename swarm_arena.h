@@ -2,7 +2,9 @@
 #define SWARM_ARENA_H
 
 #include <Arduino.h>
-#include <Queue>
+#include<iostream>
+#include<queue>
+#include<math.h>
 using namespace std;
 
 extern const int COL; //total length/box length
@@ -12,22 +14,22 @@ int** getmap(int entry,int col, int row);
 
 //mainlit used for closed list operations
 //for static and dynamic Robots
-class node
-{
-  private:
-    int pos_x = -10;
-    int pos_y = -10;
-  public:
-    node(int x_cord,int y_cord);
-    int** draw_obstacle(int** arr4);
-    friend bool operator== (const node& n1, const node& n2);
-    friend bool operator!= (const node& n1, const node& n2);
-    void setnoderow(int val){pos_y = val;}
-    void setnodecol(int val){pos_x = val;}
-    int getnoderow(){return pos_y;}
-    int getnodecol(){return pos_x;}
-};
-void print_node(node& param);
+// class node
+// {
+//   private:
+//     int pos_x = -10;
+//     int pos_y = -10;
+//   public:
+//     node(int x_cord,int y_cord);
+//     int** draw_obstacle(int** arr4);
+//     friend bool operator== (const node& n1, const node& n2);
+//     friend bool operator!= (const node& n1, const node& n2);
+//     void setnoderow(int val){pos_y = val;}
+//     void setnodecol(int val){pos_x = val;}
+//     int getnoderow(){return pos_y;}
+//     int getnodecol(){return pos_x;}
+// };
+// void print_node(node& param);
 
 
 void printmap(int** arr,int col, int row);
@@ -94,6 +96,7 @@ void generate_successors(int** arr7, complete_node &param,int gx,int gy, int lef
 
 void printopenedlist();
 void printclosedlist();
+void releaseopenedlistmemory();
 int** Astar(int sx, int sy, int gx, int gy, int** arr5, int left_lim, int right_lim);
 
 
