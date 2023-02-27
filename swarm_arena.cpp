@@ -39,7 +39,6 @@ void printmap_rev(int** arr,int col, int row)
       Serial.println();
   }
 }
-//create obstacle and put it in  closed list
 int** place_obstacle(int** arr1,int posi_x,int posi_y)
 { 
   //node obj(posi_x,posi_y);
@@ -56,7 +55,7 @@ int** our_obstacles(int** arr3)
 }
 
 /////////////////////////////////////////////
-///////// Astar things starts here /////////
+///////// Astar starts here ////////////////
 ///////////////////////////////////////////
 
 //each node has some features
@@ -83,31 +82,29 @@ bool operator!= (const complete_node& n1, const complete_node& n2)//Operator Ove
 }
 void print_complete_node(complete_node &param)
 {
-  Serial.print("     Destination(x,y): ");
+  Serial.print("\tDestination(x,y): ");
   Serial.print(param.getcol());
   Serial.print(" , ");
   Serial.print(param.getrow());
   Serial.print("");
-  Serial.print("     Source(x,y): ");
+  Serial.print(" Source(x,y): ");
   Serial.print(param.getPcol());
   Serial.print(" , ");
   Serial.print(param.getProw());
-  Serial.print("     Gnn: ");
+  Serial.print(" Gnn: ");
   Serial.print(param.getgnn());
-  Serial.print("     Hnn: ");
+  Serial.print(" Hnn: ");
   Serial.print(param.gethnn());
-  Serial.print("     Fnn: ");
+  Serial.print(" Fnn: ");
   Serial.println(param.getfnn());
 }
 
-
-bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim)
+bool isgoalsourcevalid(int**arr7, int sx, int sy, int gx, int gy, int left_lim, int right_lim)
 {
-  if((sx >= left_lim) && (sx <= right_lim) && (gx >= left_lim) && (gx <= right_lim) &&
-  (sy >= 0) && (sy < ROW ) && (gy >= 0) && (gy < ROW))
+  if((sy >= 0) && (sy < ROW ) && (gy >= 0) && (gy < ROW) && (arr7[sy][sx] != 0) && (arr7[gy][gx] != 0) && (sx >= left_lim) && (sx <= right_lim) && (gx >= left_lim) && (gx <= right_lim))
   {
-    Serial.println("Passed: Source & Goal Valid.");
-    return true;
+      Serial.println("Passed: Source & Goal Valid.");
+      return true;
   }
   else
   {
@@ -158,9 +155,7 @@ bool isdestination(int sx, int sy, int gx, int gy)
 priority_queue<complete_node, vector<complete_node>,comparefnn> openedlist;
 queue<complete_node> closedlist;
 
-
 complete_node existingputar(-1,-1,-1,-1,-1,-1);
-
 bool notinclosed(complete_node &param) //return true if not found in closed
 {
   bool out = true;
@@ -427,39 +422,83 @@ Serial.println("Closed List: ");
   {
   }
 }
+
 void releaseopenedlistmemory()
 {
   while(!openedlist.empty())
   {
     openedlist.pop();
   }
-  Serial.println("Opened List memory released.");
+  //Serial.println("Opened List memory released.");
 }
 
-int** trackthepath(int sx, int sy, int gx, int gy)
+astar_result::astar_result(int ** param, int val, bool inp)
+  {
+    arr = param;
+    size = val;
+    success = inp;
+  }
+
+astar_result trackthepath(int sx, int sy, int gx, int gy)
 {
-  releaseopenedlistmemory();
+  releaseopenedlistmemory(); //released opened memory
   complete_node goal(gx,gy,closedlist.back().getcol(),closedlist.back().getrow(),(closedlist.back().getgnn()+closedlist.back().gethnn()),0);
+  int cx = goal.getPcol();
+  int cy = goal.getProw();
   stack<complete_node>closedstack;
-  while(!closedlist.empty())
+  stack<complete_node>pathstack;
+  //Serial.println("-----closedlist to closed stack------");
+  while(!closedlist.empty()) // released closed memory
   {
     closedstack.emplace(closedlist.front());
-    print_complete_node(closedstack.top());
+    //print_complete_node(closedstack.top());
     closedlist.pop();
   }
-  closedstack.emplace(goal);
-  print_complete_node(closedstack.top());
-  int** pathi = getmap(0,2,2);
-  return pathi;
+  //Serial.println("Closed List memory released.");
+  pathstack.emplace(goal);
+  Serial.println("Cleaned Path stack: ");
+  print_complete_node(pathstack.top());
+  while(!closedstack.empty()) //releasing closedstack memory & collecting the cleaned nodes
+  {
+    if((closedstack.top().getcol() == cx) && (closedstack.top().getrow() == cy))
+    {
+      pathstack.emplace(closedstack.top());
+      print_complete_node(pathstack.top());
+      cx = closedstack.top().getPcol();
+      cy = closedstack.top().getProw();
+      closedstack.pop();
+    }
+    else
+    {
+      closedstack.pop();
+    }
+  }
+  //Serial.println("Closed stack memory released.");
+  //size of the pathclosed stack cleaned version
+  int path_size = pathstack.size();
+  int** pathi = getmap(0,path_size,2); //generate empty zeros path array
+  int i=0;
+  while(i<path_size) //removing from node stack for just coordinates in 2D array
+  {
+    pathi[0][i] = pathstack.top().getcol();
+    pathi[1][i] = pathstack.top().getrow();
+    pathstack.pop();
+    i++;
+  }
+
+  astar_result obj(pathi, path_size, true);
+  return obj;
 }
-int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_lim)
+
+astar_result Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_lim)
 {
+  int i = 0;
   Serial.println("A-Star Started...");
-  bool gsv = isgoalsourcevalid(sx, sy, gx, gy, left_lim, right_lim); //returns bool
+  bool gsv = isgoalsourcevalid(arr5, sx, sy, gx, gy, left_lim, right_lim); //returns bool
   bool sgs = issourcegoalsame(sx, sy, gx, gy); //returns bool
   if(gsv && sgs)
   {
-    int i = 0;
+
     arr5 = markgoalandstart(arr5,sx,sy,gx,gy);
     //object for start node
     complete_node start(sx,sy,sx,sy,0,heuristic(sx,sy,gx,gy));
@@ -476,29 +515,31 @@ int** Astar(int sx, int sy, int gx, int gy, int**arr5, int left_lim, int right_l
       generate_successors(arr5, parent, gx, gy, left_lim, right_lim);//child expanded
       //----- ( e ) push explored to the closed list
       closedlist.emplace(parent); //sending previously expanded node in closed list.
-
-      Serial.print("Iteration# ");
-      Serial.println(i++);
+      i++;
     }
   }
   else
   {
-    Serial.println("Unsuccessful: Something went Wrong in A-start! Recheck Goal & Source.");
-    return getmap(0,1,1);
+    Serial.println("Unsuccessful: Something went Wrong in A-start! Recheck Goal/ Source & Limits.");
+    astar_result obj(getmap(0,0,0),0, false);
+    return obj;
   }
   if(!found_dest)
   {
     printclosedlist();
     printopenedlist();
     Serial.println("Unsucessful: Goal not found in Map.");
-    return getmap(0,1,1);
+    astar_result obj(getmap(0,0,0),0, false);
+    return obj;
   }
   else
   {
-    printclosedlist();
+    //printclosedlist();
     // printopenedlist();
-    Serial.println("Success: A-Star Finished succesfully, Returning Path.");
-    int** cpppath = trackthepath(sx, sy, gx,gy);
-    return cpppath;
+    Serial.print("Success: A-Star Finished succesfully, Returning Path after ");
+    Serial.print("Iteration# ");
+    Serial.println(i);
+    astar_result obj = trackthepath(sx, sy, gx,gy);
+    return obj;
   }
 }

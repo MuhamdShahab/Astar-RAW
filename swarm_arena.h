@@ -51,6 +51,8 @@ class complete_node
   void sethnn(float val){ hnn = val;}
   void setgnn(float val){ gnn = val;}
   void setfnn(float val){ fnn = val;}
+  ~complete_node(){}
+
 };
 void print_complete_node(complete_node& param);
 class comparefnn
@@ -61,7 +63,7 @@ public:
         return a.getfnn() > b.getfnn();
     }
 };
-bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim);
+bool isgoalsourcevalid(int**arr7,int sx, int sy, int gx, int gy, int left_lim, int right_lim);
 bool issourcegoalsame(int sx, int sy, int gx, int gy);
 int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy);
 double cost_calculator(double sx, double sy, double gx, double gy);
@@ -75,8 +77,40 @@ void generate_successors(int** arr7, complete_node &param,int gx,int gy, int lef
 void printopenedlist();
 void printclosedlist();
 void releaseopenedlistmemory();
-int** trackthepath(int sx, int sy, int gx,int gy);
-int** Astar(int sx, int sy, int gx, int gy, int** arr5, int left_lim, int right_lim);
+class astar_result
+{
+  int** arr;
+  int size = 2;
+  bool success = false;
+  public:
+    astar_result(int ** param, int val, bool inp);
+    int** getpath()
+    {
+      return arr;
+    }
+    int getsize()
+    {
+      return size;
+    }
+    bool getsuccess()
+    {
+      return success;
+    }
+    void setpath(int** param)
+    {
+      arr = param;
+    }
+    void setsize(int val)
+    {
+      size = val;
+    }
+    bool setsuccess(bool inp)
+    {
+      success = inp;
+    }
+};
+astar_result trackthepath(int sx, int sy, int gx,int gy);
+astar_result Astar(int sx, int sy, int gx, int gy, int** arr5, int left_lim = 0, int right_lim = COL);
 
 
 #endif
