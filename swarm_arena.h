@@ -5,40 +5,17 @@
 #include<iostream>
 #include<queue>
 #include<math.h>
+#include <stack>
 using namespace std;
 
 extern const int COL; //total length/box length
 extern const int ROW; //total height/box height
 
 int** getmap(int entry,int col, int row);
-
-//mainlit used for closed list operations
-//for static and dynamic Robots
-// class node
-// {
-//   private:
-//     int pos_x = -10;
-//     int pos_y = -10;
-//   public:
-//     node(int x_cord,int y_cord);
-//     int** draw_obstacle(int** arr4);
-//     friend bool operator== (const node& n1, const node& n2);
-//     friend bool operator!= (const node& n1, const node& n2);
-//     void setnoderow(int val){pos_y = val;}
-//     void setnodecol(int val){pos_x = val;}
-//     int getnoderow(){return pos_y;}
-//     int getnodecol(){return pos_x;}
-// };
-// void print_node(node& param);
-
-
 void printmap(int** arr,int col, int row);
 void printmap_rev(int** arr,int col, int row);
-
 int** place_obstacle(int** arr1,int posi_x,int posi_y);
 int** our_obstacles(int** arr3 = 0);
-
-
 class complete_node
 {
   private:
@@ -84,19 +61,21 @@ public:
         return a.getfnn() > b.getfnn();
     }
 };
-   
 bool isgoalsourcevalid(int sx, int sy, int gx, int gy, int left_lim, int right_lim);
 bool issourcegoalsame(int sx, int sy, int gx, int gy);
 int** markgoalandstart(int** arr6,int sx,int sy,int gx,int gy);
 double cost_calculator(double sx, double sy, double gx, double gy);
 double heuristic(double sx, double sy, double gx, double gy);
-
-
+bool isdestination(int sx, int sy, int gx, int gy);
+bool notinclosed(complete_node &param);
+void updateexistinginclosed(complete_node &param);
+bool notinopened(complete_node &param);
+void updateexistinginopened(complete_node &param);
 void generate_successors(int** arr7, complete_node &param,int gx,int gy, int left_lim, int right_lim);
-
 void printopenedlist();
 void printclosedlist();
 void releaseopenedlistmemory();
+int** trackthepath(int sx, int sy, int gx,int gy);
 int** Astar(int sx, int sy, int gx, int gy, int** arr5, int left_lim, int right_lim);
 
 
